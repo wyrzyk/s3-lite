@@ -108,8 +108,73 @@ s3-lite is not tightly-coupled with any HTTP implementation. It provides a plugg
 Default implementations are provided for Apache HTTP Client and JVM's URLConnection, but you can replace it with another implementation that better suits your use-case.
 Although the Apache HTTP Client works well in general, there are often benefits to using a client that is more optimized for your runtime environment.
 
-For example, in AWS Lambda, where startup time is one of the biggest latency concerns, 
+For example, in AWS Lambda, where startup time is one of the biggest latency concerns,
 you might want to use an HTTP client based on the JVM’s lightweight URLConnection, instead of Apache’s higher-throughput, but slower-to-start HTTP client.
+
+## Resolving artifacts using Maven
+
+Maven settings:
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<settings xsi:schemaLocation='http://maven.apache.org/SETTINGS/1.0.0 http://maven.apache.org/xsd/settings-1.0.0.xsd'
+          xmlns='http://maven.apache.org/SETTINGS/1.0.0' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
+
+    <profiles>
+        <profile>
+            <repositories>
+                <repository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>bintray-wyrzyk-maven</id>
+                    <name>bintray</name>
+                    <url>https://dl.bintray.com/wyrzyk/maven</url>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                    <id>bintray-wyrzyk-maven</id>
+                    <name>bintray-plugins</name>
+                    <url>https://dl.bintray.com/wyrzyk/maven</url>
+                </pluginRepository>
+            </pluginRepositories>
+            <id>bintray</id>
+        </profile>
+    </profiles>
+    <activeProfiles>
+        <activeProfile>bintray</activeProfile>
+    </activeProfiles>
+</settings>
+```
+
+Using the s3-lite modules in maven:
+
+```xml
+<dependency>
+    <groupId>io.github.linktosriram</groupId>
+    <artifactId>s3-lite-http-client-apache</artifactId>
+    <version>0.1.0</version>
+    <scope>compile</scope>
+</dependency>
+```
+
+## Resolving artifacts using Gradle
+```groovy
+repositories {
+    maven {
+        url "https://dl.bintray.com/wyrzyk/maven"
+    }
+}
+```
+
+Using the s3-lite modules in gradle:
+
+```groovy
+compile "io.github.linktosriram:s3-lite-http-client-apache:0.1.0"
+```
 
 ## Creation
 
@@ -123,7 +188,7 @@ S3Client client = new DefaultS3ClientBuilder()
 
 ## Client Lifecycle
 
-Service clients in the SDK are thread-safe. For best performance, treat them as long-lived objects. Each client has its own connection pool resource that is released when the client is garbage collected. 
+Service clients in the SDK are thread-safe. For best performance, treat them as long-lived objects. Each client has its own connection pool resource that is released when the client is garbage collected.
 
 For best practices, explicitly close a client by calling the `close()` method.
 

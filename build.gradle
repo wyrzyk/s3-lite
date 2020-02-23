@@ -1,8 +1,24 @@
+def projectVersion = "0.1.0"
+def group = "io.github.linktosriram"
+
+buildscript {
+    repositories {
+        mavenLocal()
+        jcenter()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
+    }
+}
 allprojects {
     apply plugin: 'java-library'
+    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
+    apply plugin: 'com.jfrog.bintray'
     sourceCompatibility = 1.8
 
     repositories {
+        mavenLocal()
         jcenter()
     }
 
@@ -14,30 +30,112 @@ allprojects {
         testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.1'
         testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.1'
     }
+    bintray {
+        user = System.getenv("BINTRAY_USER")
+        key = System.getenv("BINTRAY_KEY")
+        publications = ["MavenModulePublication"]
+        pkg {
+            repo = "maven"
+            name = "s3-lite"
+            licenses = ["MIT"]
+            vcsUrl = "https://github.com/wyrzyk/s3-lite.git"
+            version {
+                name = projectVersion
+                released = new Date()
+                vcsTag = projectVersion
+            }
+        }
+    }
+}
+
+project(':http-client-spi') {
+    publishing {
+        publications {
+            MavenModulePublication(MavenPublication) {
+                from components.java
+                groupId(group)
+                artifactId("s3-lite-http-client-spi")
+                version(projectVersion)
+            }
+        }
+    }
 }
 
 project(':api') {
     dependencies {
-        api project(':http-client-spi')
+        api(project(":http-client-spi"))
+    }
+    publishing {
+        publications {
+            MavenModulePublication(MavenPublication) {
+                from components.java
+                groupId(group)
+                artifactId("s3-lite-api")
+                version(projectVersion)
+            }
+        }
+    }
+}
+
+project(':util') {
+    publishing {
+        publications {
+            MavenModulePublication(MavenPublication) {
+                from components.java
+                groupId(group)
+                artifactId("s3-lite-util")
+                version(projectVersion)
+            }
+        }
     }
 }
 
 project(':core') {
     dependencies {
-        api project(':api')
-        implementation project(':util')
+        api(project(":api"))
+        implementation(project(":util"))
+    }
+    publishing {
+        publications {
+            MavenModulePublication(MavenPublication) {
+                from components.java
+                groupId(group)
+                artifactId("s3-lite-core")
+                version(projectVersion)
+            }
+        }
     }
 }
 
 project(':http-client-apache') {
     dependencies {
-        api project(':http-client-spi')
-        api 'org.apache.httpcomponents:httpclient:4.5.9'
+        api(project(":http-client-spi"))
+        api("org.apache.httpcomponents:httpclient:4.5.9")
+    }
+    publishing {
+        publications {
+            MavenModulePublication(MavenPublication) {
+                from components.java
+                groupId(group)
+                artifactId("s3-lite-http-client-apache")
+                version(projectVersion)
+            }
+        }
     }
 }
 
 project(':http-client-url-connection') {
     dependencies {
-        api project(':http-client-spi')
+        api(project(":http-client-spi"))
+    }
+    publishing {
+        publications {
+            MavenModulePublication(MavenPublication) {
+                from components.java
+                groupId(group)
+                artifactId("s3-lite-http-client-url-connection")
+                version(projectVersion)
+            }
+        }
     }
 }
